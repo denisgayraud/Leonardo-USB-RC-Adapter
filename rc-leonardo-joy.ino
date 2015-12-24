@@ -10,26 +10,21 @@ volatile uint16_t rcValue[RC_CHANS] = {1502, 1502, 1502, 1502, 1502};
 byte led = 1;
 int led_cnt = 0;
 
-
 const bool testAutoSendMode = false;
 
 enum {
-  THROTTLE,
   ROLL,
   PITCH,  
+  THROTTLE,
   YAW,
   AUX1
 };
 
-void setup(){
+void setup() {
   setupPins();
-  //setupUnoJoy();
-  if (testAutoSendMode)
-  {
+  if (testAutoSendMode) {
     Joystick.begin();
-  }
-  else
-  {
+  } else {
     Joystick.begin(false);
   }
 }
@@ -40,19 +35,23 @@ void loop(){
   setControllerDataJoystick(controllerData);
   Joystick.sendState();
 
-  Serial.print(controllerData.rightStickX); Serial.print("     ");
-  Serial.print(controllerData.rightStickY);      Serial.print("     ");
-  Serial.print(controllerData.leftStickX);    Serial.print("     ");
-  Serial.print(controllerData.leftStickY);     Serial.println("     ");
+  // Serial.print(controllerData.rightStickX); 
+  // Serial.print("\t");
+  // Serial.print(controllerData.rightStickY);
+  // Serial.print("\t");
+  // Serial.print(controllerData.leftStickX);
+  // Serial.print("\t");
+  // Serial.print(controllerData.leftStickY);
+  // Serial.println("\t");
 
-  led_cnt=led_cnt++;
-  if(led_cnt>200){
-    led=!led;
-    digitalWrite(LED_PIN,led);
-    led_cnt=0;
-  }
+  // led_cnt=led_cnt++;
+  // if(led_cnt>200){
+  //   led=!led;
+  //   digitalWrite(LED_PIN,led);
+  //   led_cnt=0;
+  // }
   
-  delay(5);
+  // delay(5);
 }
 
 void setControllerDataJoystick(dataForController_t dataToSet){
@@ -66,19 +65,22 @@ void setupPins(void){
   // Set all the digital pins as inputs
   // with the pull-up enabled, except for the 
   // two serial line pins
-  for (int i = 2; i <= 12; i++){
-    pinMode(i, INPUT);
-    digitalWrite(i, HIGH);
-  }
+
+  // for (int i = 2; i <= 12; i++){
+  //   pinMode(i, INPUT);
+  //   digitalWrite(i, HIGH);
+  // }
+
   pinMode(A4, INPUT);
   digitalWrite(A4, HIGH);
   pinMode(A5, INPUT);
   digitalWrite(A5, HIGH);
   
-  if ( usePPM ) 
-    attachInterrupt(digitalPinToInterrupt(0), rxInt, RISING);
-
-  pinMode(LED_PIN,OUTPUT);
+  if ( usePPM ) { 
+    attachInterrupt(0, rxInt, RISING); //interrupt 0 is pin#3 on Leonardo
+  }
+  
+  pinMode(LED_PIN, OUTPUT);
 }
 
 dataForController_t getControllerData(void){
@@ -92,30 +94,34 @@ dataForController_t getControllerData(void){
   // Since our buttons are all held high and
   //  pulled low when pressed, we use the "!"
   //  operator to invert the readings from the pins
-  if ( !usePPM )
-    controllerData.triangleOn = !digitalRead(2); //pin 2 is used for PPM input
-  controllerData.circleOn = !digitalRead(3);
-  controllerData.squareOn = !digitalRead(4);
-  controllerData.crossOn = !digitalRead(5);
-  controllerData.dpadUpOn = !digitalRead(6);
-  controllerData.dpadDownOn = !digitalRead(7);
-  controllerData.dpadLeftOn = !digitalRead(8);
-  controllerData.dpadRightOn = !digitalRead(9);
-  controllerData.l1On = !digitalRead(10);
-  controllerData.r1On = !digitalRead(11);
-  controllerData.selectOn = !digitalRead(12);
-  controllerData.startOn = !digitalRead(A4);
-  controllerData.homeOn = !digitalRead(A5);
+
+  // if ( !usePPM ) {
+  //   controllerData.triangleOn = !digitalRead(2); //pin 2 is used for PPM input
+  // }
+
+  // controllerData.circleOn = !digitalRead(3);
+  // controllerData.squareOn = !digitalRead(4);
+  // controllerData.crossOn = !digitalRead(5);
+  // controllerData.dpadUpOn = !digitalRead(6);
+  // controllerData.dpadDownOn = !digitalRead(7);
+  // controllerData.dpadLeftOn = !digitalRead(8);
+  // controllerData.dpadRightOn = !digitalRead(9);
+  // controllerData.l1On = !digitalRead(10);
+  // controllerData.r1On = !digitalRead(11);
+  // controllerData.selectOn = !digitalRead(12);
+  // controllerData.startOn = !digitalRead(A4);
+  // controllerData.homeOn = !digitalRead(A5);
   
   // Set the analog sticks
   //  Since analogRead(pin) returns a 10 bit value,
   //  we need to perform a bit shift operation to
   //  lose the 2 least significant bits and get an
   //  8 bit number that we can use  
-  controllerData.leftStickX = analogRead(A0) >> 2;
-  controllerData.leftStickY = analogRead(A1) >> 2;
-  controllerData.rightStickX = analogRead(A2) >> 2;
-  controllerData.rightStickY = analogRead(A3) >> 2;
+
+  // controllerData.leftStickX = analogRead(A0) >> 2;
+  // controllerData.leftStickY = analogRead(A1) >> 2;
+  // controllerData.rightStickX = analogRead(A2) >> 2;
+  // controllerData.rightStickY = analogRead(A3) >> 2;
   
   if ( usePPM ) {
     // use AUX1 switch to press the triangle button
@@ -155,7 +161,7 @@ uint16_t adjust(uint16_t diff, uint8_t chan) {
 
 // PPM interrupt routine courtesy of MultiWii source code
 void rxInt(void) {
-  uint16_t now,diff;
+  uint16_t now, diff;
   static uint16_t last = 0;
   static uint8_t chan = 0;
 
@@ -163,9 +169,11 @@ void rxInt(void) {
   sei();
   diff = now - last;
   last = now;
-  if(diff>3000) chan = 0;
+  if(diff > 3000) {
+    chan = 0;
+  }
   else {
-    if(900<diff && diff<2200 && chan<RC_CHANS ) {
+    if(900 < diff && diff < 2200 && chan < RC_CHANS) {
       rcValue[chan] = adjust(diff,chan);
     }
     chan++;
