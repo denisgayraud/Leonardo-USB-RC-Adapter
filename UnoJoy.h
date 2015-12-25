@@ -76,12 +76,12 @@
 		uint8_t dpadRightOn : 1;
 
 		uint8_t dpadDownOn : 1;
-        uint8_t padding : 7;     // We end with 7 bytes of padding to make sure we get our data aligned in bytes
+    uint8_t padding : 7;     // We end with 7 bytes of padding to make sure we get our data aligned in bytes
                                  
-		uint8_t leftStickX : 8;  // Each of the analog stick values can range from 0 to 255
-		uint8_t leftStickY : 8;  //  0 is fully left or up
-		uint8_t rightStickX : 8; //  255 is fully right or down 
-		uint8_t rightStickY : 8; //  128 is centered.
+		uint16_t leftStickX : 16;  // Each of the analog stick values can range from 0 to 255
+		uint16_t leftStickY : 16;  //  0 is fully left or up
+		uint16_t rightStickX : 16; //  255 is fully right or down 
+		uint16_t rightStickY : 16; //  128 is centered.
                                  // Important - analogRead(pin) returns a 10 bit value, so if you're getting strange
                                  //  results from analogRead, you may need to do (analogRead(pin) >> 2) to get good data
 	} dataForController_t;

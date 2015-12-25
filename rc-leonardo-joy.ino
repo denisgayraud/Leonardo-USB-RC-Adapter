@@ -55,10 +55,10 @@ void loop(){
 }
 
 void setControllerDataJoystick(dataForController_t dataToSet){
-  Joystick.setXAxis(dataToSet.rightStickX-127);
-  Joystick.setYAxis(dataToSet.rightStickY-127);
-  Joystick.setXAxisRotation(dataToSet.leftStickX);
-  Joystick.setZAxis(dataToSet.leftStickY-127);
+  Joystick.setXAxis(dataToSet.leftStickX);
+  Joystick.setYAxis(dataToSet.leftStickY);
+  Joystick.setXAxisRotation(dataToSet.rightStickX);
+  Joystick.setYAxisRotation(dataToSet.rightStickY);
 }
 
 void setupPins(void){
@@ -141,8 +141,8 @@ dataForController_t getControllerData(void){
 ////////////////////////////////////////////////////////////////////////////////////
 
 // Convert a value in the range 1000-2000 to 0-255
-byte stickValue(int rcVal) {
-  return map( constrain(rcVal - 1000, 0, 1000), 0, 1000, 0, 255);
+uint16_t stickValue(uint16_t rcVal) {
+  return constrain(rcVal - 1000, 0, 1000);
 }
 
 // Some adjustments I used because my cheapass TX has no trims.

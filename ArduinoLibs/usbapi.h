@@ -190,9 +190,9 @@ class Joystick_
 {
 private:
 	bool     autoSendState;
-	int8_t	 xAxis;
-	int8_t	 yAxis;
-	int8_t	 zAxis;
+	int16_t	 xAxis;
+	int16_t	 yAxis;
+	int16_t	 zAxis;
 	int16_t	 xAxisRotation;
 	int16_t	 yAxisRotation;
 	int16_t	 zAxisRotation;
@@ -207,9 +207,9 @@ public:
 	void begin(bool initAutoSendState = true);
 	void end();
 
-	void setXAxis(int8_t value);
-	void setYAxis(int8_t value);
-	void setZAxis(int8_t value);
+	void setXAxis(int16_t value);
+	void setYAxis(int16_t value);
+	void setZAxis(int16_t value);
 
 	void setXAxisRotation(int16_t value);
 	void setYAxisRotation(int16_t value);

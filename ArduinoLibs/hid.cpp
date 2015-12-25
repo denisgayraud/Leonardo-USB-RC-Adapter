@@ -179,18 +179,19 @@ const u8 _hidReportDescriptor[] = {
 	0x81, 0x02,			//   INPUT (Data,Var,Abs)
 
 	// X, Y, and Z Axis
-	0x15, 0x00,			//   LOGICAL_MINIMUM (0)
-	0x26, 0xff, 0x00,	//   LOGICAL_MAXIMUM (255)
-	0x75, 0x08,			//   REPORT_SIZE (8)
-	0x09, 0x01,			//   USAGE (Pointer)
-	0xA1, 0x00,			//   COLLECTION (Physical)
+	// 0x09, 0x01,			//   USAGE (Pointer)
+	// 0x09, 0x32,		    //     USAGE (z)
+	// 0x09, 0x35,		    //     USAGE (rz)
+
+	0xA1, 0x00,				//   COLLECTION (Physical)
 	0x09, 0x30,		    //     USAGE (x)
 	0x09, 0x31,		    //     USAGE (y)
-	0x09, 0x32,		    //     USAGE (z)
 	0x09, 0x33,		    //     USAGE (rx)
 	0x09, 0x34,		    //     USAGE (ry)
-	0x09, 0x35,		    //     USAGE (rz)
-	0x95, 0x06,		    //     REPORT_COUNT (6)
+	0x15, 0x00,				//		 LOGICAL_MINIMUM (0)
+	0x26, 0xE8, 0x03,	//  	 LOGICAL_MAXIMUM (1000)
+	0x75, 0x10,				//	   REPORT_SIZE (16)
+	0x95, 0x04,		    //     REPORT_COUNT (4)
 	0x81, 0x02,		    //     INPUT (Data,Var,Abs)
 	0xc0,				//   END_COLLECTION
 
@@ -590,16 +591,16 @@ size_t Keyboard_::write(uint8_t c)
 //	Joystick
 //
 
-#define joystickStateSize 13
+#define joystickStateSize 15
 
 Joystick_::Joystick_()
 {
 	xAxis = 0;
 	yAxis = 0;
-	zAxis = 0;
+	// zAxis = 0;
 	xAxisRotation = 0;
 	yAxisRotation = 0;
-	zAxisRotation = 0;
+	// zAxisRotation = 0;
 	buttons = 0;
 	throttle = 0;
 	rudder = 0;
@@ -650,17 +651,17 @@ void Joystick_::setRudder(uint8_t value)
 	if (autoSendState) sendState();
 }
 
-void Joystick_::setXAxis(int8_t value)
+void Joystick_::setXAxis(int16_t value)
 {
 	xAxis = value;
 	if (autoSendState) sendState();
 }
-void Joystick_::setYAxis(int8_t value)
+void Joystick_::setYAxis(int16_t value)
 {
 	yAxis = value;
 	if (autoSendState) sendState();
 }
-void Joystick_::setZAxis(int8_t value)
+void Joystick_::setZAxis(int16_t value)
 {
 	zAxis = value;
 	if (autoSendState) sendState();
@@ -722,14 +723,15 @@ void Joystick_::sendState()
 	// Pack hat-switch states into a single byte
 	data[6] = (convertedHatSwitch[1] << 4) | (B00001111 & convertedHatSwitch[0]);
 
-	data[7] = xAxis + 127;
-	data[8] = yAxis + 127;
-	data[9] = zAxis + 127;
+	data[7] = lowByte(xAxis);
+	data[8] = highByte(xAxis);
+	data[9] = lowByte(yAxis);
+	data[10] = highByte(yAxis);
 
-	//data[10] = (xAxisRotation % 360) * 0.708;
-	data[10] = (xAxisRotation % 360);
-	data[11] = (yAxisRotation % 360) * 0.708;
-	data[12] = (zAxisRotation % 360) * 0.708;
+	data[11] = lowByte(xAxisRotation);
+	data[12] = highByte(xAxisRotation);
+	data[13] = lowByte(yAxisRotation);
+	data[14] = highByte(yAxisRotation);
 
 	// HID_SendReport(Report number, array of values in same order as HID descriptor, length)
 	HID_SendReport(JOYSTICK_REPORT_ID, data, joystickStateSize);
