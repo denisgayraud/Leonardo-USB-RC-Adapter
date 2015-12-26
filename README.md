@@ -1,19 +1,24 @@
 # rc-leonardo-joy
-Adaptor for RC simulators based on Arduino Leonardo. Accepts direct PPM input from radio
+This project turns Arduino Leonardo (or Pro Micro) into a USB adapter for RC transmitter.
+The adapter can be used to play [FPV Freerider](http://fpv-freerider.itch.io/fpv-freerider) 
+or other flight simulators. 
 
-This project based on two another projects:
+The project is based on [rc-leonardo-joy](https://github.com/i--storm/rc-leonardo-joy)
+and contains the following improvements:
+- higher sticks resolution (0 - 1000 instead of 0 - 255),
+- sharper reading of ppm intervals (using timer input capture interrupt instead of _micros()_ func)
+- cleaner and more specialized code 
 
-1. [UnoJoy](https://github.com/AlanChatham/UnoJoy)
+#Flashing:
+Put "hid.cpp" and "usbapi.h" from ArduinoLibs folder into Arduino installation folder: 
+<Arduino_Installation_Folder>\hardware\arduino\cores\arduino\  
+Choose Leonardo board and simply flash it with the sketch
 
-2. [Add USB Game Controller to Arduino Leonardo/Micro](http://www.instructables.com/id/Add-USB-Game-Controller-to-Arduino-LeonardoMicro/step9/Joystick-Library/#step1) 
+#Connections:
+- RC PPM out <--> Digital Pin 4 of Arduino Leonardo
+- RC GND  <--> Arduino GND
 
-I've combined them into one. So you do not need to flash Atmega32U2 on Arduino Mega board. You need only Arduino Leonardo/Micro board with Atmega32U4. 
-
-You should replace two files in Arduino folder **hid.cpp** and **usbapi.h**
-They slightly differs from MatthewH's ones.
-I use Arduino 1.6.5 r5. Choose board Leonardo and simply flash it with sketch
-
-Connect Arduino Ground and D0(RX) pins to PPM output of your receiver. 
+#Usage:
 In Windows, find Arduino Leonardo in Devices and Printers. Then right click on it and choose Game device Parameters. Calibrate joystick there using your RC transmitter connected
 
-Initially project was designed to be user with Turnigy 9XR and FPV FreeRider simulator. I don't know how it will work with other transmitters and simulators.
+Tested on Futaba 7C transmitter and FPV FreeRider simulator.
