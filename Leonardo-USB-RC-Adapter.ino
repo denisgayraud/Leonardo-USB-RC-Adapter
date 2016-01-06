@@ -82,34 +82,21 @@ void setup() {
 }
 
 void loop(){
-	// dataForController_t controllerData = getControllerData();
 	setControllerDataJoystick();
 	Joystick.sendState();
 
 #ifdef SERIALOUT	
-	Serial.print(rcValue[0]); 
+	Serial.print(rcValue[YAW]); 
 	Serial.print("\t");
-	Serial.print(rcValue[1]); 
+	Serial.print(rcValue[THROTTLE]); 
 	Serial.print("\t");
-	Serial.print(rcValue[2]); 
+	Serial.print(rcValue[ROLL]); 
 	Serial.print("\t");
-	Serial.print(rcValue[3]); 
+	Serial.print(rcValue[PITCH]); 
 	Serial.print("\t");
-	Serial.print(rcValue[4]); 
+	Serial.print(rcValue[AUX1]); 
 	Serial.print("\t");
-	Serial.print(rcValue[5]); 
-	Serial.print("\t");
-	Serial.print(controllerData.rightStickX); 
-	Serial.print("\t");
-	Serial.print(controllerData.rightStickY);
-	Serial.print("\t");
-	Serial.print(controllerData.leftStickX);
-	Serial.print("\t");
-	Serial.print(controllerData.leftStickY);
-	Serial.print("\t");
-	Serial.print(controllerData.triangleOn);
-	Serial.print("\t");
-	Serial.print(controllerData.circleOn);
+	Serial.print(rcValue[AUX2]); 
 	Serial.println("\t");
 #endif
 }
