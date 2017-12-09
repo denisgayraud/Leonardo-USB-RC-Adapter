@@ -1,44 +1,40 @@
 /**************************************************************************************************
 This sketch turns Arduino Leonardo (or Pro Micro) into a USB adapter for RC transmitter.
-The adapter can be used to play FPV Freerider (http://fpv-freerider.itch.io/fpv-freerider) 
-or other flight simulators. 
 
 Prerequisite: 
-Put "hid.cpp" and "usbapi.h" from ArduinoLibs folder into Arduino installation folder before compiling:
-	<Arduino_Installation_Folder>\hardware\arduino\cores\arduino\ 
+Install Arduino Joystik library: https://github.com/MHeironimus/ArduinoJoystickLibrary
 
 Connections:
 - RC PPM out <--> Digital Pin 4 of Arduino Leonardo
 - RC GND  <--> Arduino GND
 
-Based on https://github.com/i--storm/rc-leonardo-joy , but enhanced as follows:
-- improved sticks resolution (from 255 to 1000),
-- improved reading of ppm intervals (using timer input capture interrupt instead of micros() func)
-- cleaned up code 
+Based on https://github.com/voroshkov/Leonardo-USB-RC-Adapter  and https://github.com/i--storm/rc-leonardo-joy , but enhanced as follows:
+  Now use MHeironimus Joystick Library.
+  Add ZAxis and RzAxis
+Done by Denis Gayraud in December 2017, 
 
-Done by Andrey Voroshkov in December 2015, 
-- github:	https://github.com/voroshkov
-- youtube:	https://www.youtube.com/user/voroshkov 
-- facebook: https://www.facebook.com/andrey.voroshkov
-- blogspot:	http://voroshkov.blogspot.com
 **************************************************************************************************/
 
 #include "Arduino.h"
 #include <avr/interrupt.h>
-
+#include <Joystick.h>
+Joystick_ Joystick(JOYSTICK_DEFAULT_REPORT_ID,JOYSTICK_TYPE_JOYSTICK,2,0,
+true,true,false,true,true,false,
+true,true,false,false,false);
+//Joystick_ Joystick;
 // Use for Futaba transmitters (they have shifted center value and narrower range by default)
 #define FUTABA
 
 // Use to enable output of PPM values to serial
-// #define SERIALOUT
-
-#define RC_CHANNELS_COUNT 6
+//#define SERIALOUT
 
 #ifdef FUTABA
-	#define STICK_HALFWAY 450
+  #define RC_CHANNELS_COUNT 8
+	#define STICK_HALFWAY 500
 	#define STICK_CENTER 1530
-	#define THRESHOLD 200
+	#define THRESHOLD 500
 #else
+  #define RC_CHANNELS_COUNT 6
 	#define STICK_HALFWAY 500
 	#define STICK_CENTER 1500
 	#define THRESHOLD 100 // threshold is used to detect PPM values (added to range at both ends)
@@ -59,16 +55,26 @@ Done by Andrey Voroshkov in December 2015,
 #define TIMER_COUNT_DIVIDER 2 
 
 // this array contains the lengths of read PPM pulses in microseconds
-volatile uint16_t rcValue[RC_CHANNELS_COUNT];
+volatile int16_t rcValue[RC_CHANNELS_COUNT];
 
 // enum defines the order of channels
-enum {
+/*enum {
 	ROLL,
 	PITCH,  
 	THROTTLE,
 	YAW,
 	AUX1,
 	AUX2
+};*/
+enum {
+  ROLL,
+  PITCH,  
+  THROTTLE,
+  YAW,
+  AUX1,
+  AUX2,
+  CH7,
+  CH8
 };
 
 void setup() {
@@ -96,7 +102,11 @@ void loop(){
 	Serial.print("\t");
 	Serial.print(rcValue[AUX1]); 
 	Serial.print("\t");
-	Serial.print(rcValue[AUX2]); 
+	Serial.print(rcValue[AUX2]);
+  Serial.print("\t");
+  Serial.print(rcValue[CH7]); 
+  Serial.print("\t");
+  Serial.print(stickValue(rcValue[CH8]));
 	Serial.println("\t");
 #endif
 }
@@ -122,20 +132,31 @@ void setupPins(void){
 	digitalWrite(PPM_CAPTURE_PIN, 1); // enable the pullup
 
 	pinMode(LED_PIN, OUTPUT);
+  digitalWrite(LED_PIN, HIGH);
+  pinMode( LED_BUILTIN_RX, INPUT); /led RX off
 }
 
 // set joystick data in HID descriptor
 void setControllerDataJoystick(){
-	Joystick.setXAxis(stickValue(rcValue[YAW]));
-	Joystick.setYAxis(stickValue(rcValue[THROTTLE]));
-	Joystick.setXAxisRotation(stickValue(rcValue[ROLL]));
-	Joystick.setYAxisRotation(stickValue(rcValue[PITCH]));
+	Joystick.setXAxis(stickValue(rcValue[ROLL]));
+	Joystick.setYAxis(stickValue(rcValue[PITCH]));
+  Joystick.setZAxis(stickValue(rcValue[AUX1]));
+
+	Joystick.setRxAxis(stickValue(rcValue[CH7]));
+	Joystick.setRyAxis(stickValue(rcValue[CH8]));
+  Joystick.setRzAxis(stickValue(rcValue[AUX2]));
+
+  Joystick.setThrottle(stickValue(rcValue[THROTTLE]));
+  //Joystick.setAccelerator(stickValue[THROTTLE]);
+  Joystick.setRudder(stickValue(rcValue[YAW]));
+  //Joystick.setBrake(stickValue(STICK_CENTER));
+  //Joystick.setSteering(stickValue(STICK_CENTER));*/
 	Joystick.setButton(0, rcValue[AUX1] > STICK_CENTER);
 	Joystick.setButton(1, rcValue[AUX2] > STICK_CENTER);
 }
 
 // Convert a value in the range of [Min Pulse - Max Pulse] to [0 - USB_STICK_VALUE_MAX]
-uint16_t stickValue(uint16_t rcVal) {
+uint16_t stickValue(int16_t rcVal) {
 	return constrain(
 		map(rcVal - MIN_PULSE_WIDTH, 
 			0, MAX_PULSE_WIDTH - MIN_PULSE_WIDTH, 
