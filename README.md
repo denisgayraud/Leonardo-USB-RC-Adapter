@@ -9,10 +9,13 @@ and contains the following improvements:
 - sharper reading of ppm intervals (using timer input capture interrupt instead of _micros()_ func)
 - cleaner and more specialized code 
 
+Improvments by D. Gayraud:
+- Use MHeironimus Joystick Library (https://github.com/MHeironimus/ArduinoJoystickLibrary) 
+- Add ZAxis and RzAxis
+
+
 #Flashing:
-- Put **hid.cpp** and **usbapi.h** from *ArduinoLibs* folder into Arduino installation folder: 
-*...\Arduino\hardware\arduino\cores\arduino\*
-- Open the sketch in Arduino IDE, choose Leonardo board, upload.
+  Open the sketch in Arduino IDE, choose Leonardo board, upload.
 
 #Connections:
 - RC PPM out <==> Digital Pin 4 of Arduino Leonardo
